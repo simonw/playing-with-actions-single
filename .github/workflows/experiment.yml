@@ -34,5 +34,14 @@ jobs:
       run: echo $PWD\spatialite-loadable-modules-5.0.0-win-amd64
     - name: Verify installation
       run: |
-        python -c "import sqlite3; db = sqlite3.Connection(':memory:'); db.enable_load_extension(True); db.load_extension('$env:GITHUB_WORKSPACE\spatialite-loadable-modules-5.0.0-win-amd64\mod_spatialite.dll'); print(db.execute('select spatialite_version()').fetchall())"
+        python -c @"
+        import sqlite3, os
+        spatialite_path = os.path.join(os.environ['GITHUB_WORKSPACE'], 'spatialite-loadable-modules-5.0.0-win-amd64', 'mod_spatialite.dll')
+        print(f'Checking path: {spatialite_path}')
+        assert os.path.exists(spatialite_path), f'SpatiaLite module not found at: {spatialite_path}'
+        db = sqlite3.Connection(':memory:')
+        db.enable_load_extension(True)
+        db.load_extension(spatialite_path)
+        print(db.execute('select spatialite_version()').fetchall())
+        "@
         # datasette --version
