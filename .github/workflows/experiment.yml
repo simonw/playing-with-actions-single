@@ -37,9 +37,14 @@ jobs:
         import sqlite3, os
         spatialite_path = os.path.join(os.environ['GITHUB_WORKSPACE'], 'mod_spatialite-5.1.0-win-amd64', 'mod_spatialite.dll')
         print(f'Checking path: {spatialite_path}')
-        assert os.path.exists(spatialite_path), f'SpatiaLite module not found at: {spatialite_path}'
+        exists = os.path.exists(spatialite_path)
+        if exists:
+            print(f'SpatiaLite file exists at: {spatialite_path}')
+        else:
+            assert False, f'SpatiaLite module not found at: {spatialite_path}'
         db = sqlite3.Connection(':memory:')
         db.enable_load_extension(True)
+        print("enable_load_extension(True) worked - trying to load extension: " + spatialite_path)
         db.load_extension(spatialite_path)
         print(db.execute('select spatialite_version()').fetchall())
         "@
