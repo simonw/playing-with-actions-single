@@ -26,6 +26,10 @@ jobs:
       run: Invoke-WebRequest -outfile spatialite.7z https://static.simonwillison.net/static/2024/spatialite-loadable-modules-5.0.0-win-amd64.7z
     - name: Unpack the archive
       run: 7z.exe x spatialite.7z
+    - name: Show all files
+      run: |
+        $folderPath = "$PWD\spatialite-loadable-modules-5.0.0-win-amd64"
+        Get-ChildItem -Path $folderPath -Recurse | ForEach-Object { $_.FullName }
     - name: Show path
       run: echo $PWD\spatialite-loadable-modules-5.0.0-win-amd64
     - name: Verify installation
