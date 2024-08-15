@@ -22,6 +22,7 @@ jobs:
       run: |
         # python -m pip install pysqlite3-binary
         # pip install datasette
+        pip install sqlite-vec
     - name: Download mod_spatialite
       run: Invoke-WebRequest -outfile spatialite.7z http://www.gaia-gis.it/gaia-sins/windows-bin-amd64/mod_spatialite-5.1.0-win-amd64.7z
     - name: Unpack the archive
@@ -35,17 +36,20 @@ jobs:
       run: |
         python -c @"
         import sqlite3, os
-        spatialite_path = os.path.join(os.environ['GITHUB_WORKSPACE'], 'mod_spatialite-5.1.0-win-amd64', 'mod_spatialite.dll')
-        print(f'Checking path: {spatialite_path}')
-        exists = os.path.exists(spatialite_path)
-        if exists:
-            print(f'SpatiaLite file exists at: {spatialite_path}')
-        else:
-            assert False, f'SpatiaLite module not found at: {spatialite_path}'
+        import sqlite_vec
+        # spatialite_path = os.path.join(os.environ['GITHUB_WORKSPACE'], 'mod_spatialite-5.1.0-win-amd64', 'mod_spatialite.dll')
+        # print(f'Checking path: {spatialite_path}')
+        # exists = os.path.exists(spatialite_path)
+        # if exists:
+        #     print(f'SpatiaLite file exists at: {spatialite_path}')
+        # else:
+        #     assert False, f'SpatiaLite module not found at: {spatialite_path}'
         db = sqlite3.Connection(':memory:')
         db.enable_load_extension(True)
-        print("enable_load_extension(True) worked - trying to load extension: " + spatialite_path)
-        db.load_extension(spatialite_path)
-        print(db.execute('select spatialite_version()').fetchall())
+        db.load_extension(sqlite_vec.loadable_path())
+        print(db.execute('select vec_version()').fetchall())
+        # print("enable_load_extension(True) worked - trying to load extension: " + spatialite_path)
+        # db.load_extension(spatialite_path)
+        # print(db.execute('select spatialite_version()').fetchall())
         "@
         # datasette --version
