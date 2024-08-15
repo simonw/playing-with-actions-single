@@ -23,18 +23,12 @@ jobs:
         python -m pip install --upgrade pip
         pip install datasette
     
-    - name: Install Spatialite
-      run: |
-        $spatialiteUrl = "https://www.gaia-gis.it/gaia-sins/windows-bin-amd64/mod_spatialite-5.0.1-win-amd64.7z"
-        $spatialiteArchive = "mod_spatialite.7z"
-        $spatialiteDir = "C:\spatialite"
-        
-        Invoke-WebRequest -Uri $spatialiteUrl -OutFile $spatialiteArchive
-        7z x $spatialiteArchive -o"$spatialiteDir"
-        
-        $env:PATH += ";$spatialiteDir"
-        [Environment]::SetEnvironmentVariable("PATH", $env:PATH, [EnvironmentVariableTarget]::Machine)
-    
+    - name: Download mod_spatialite
+      run: Invoke-WebRequest -outfile spatialite.7z https://static.simonwillison.net/static/2024/spatialite-loadable-modules-5.0.0-win-amd64.7z
+    - name: Unpack the archive
+      run: 7z.exe x spatialite.7z
+    - name: Show path
+      run: echo $PWD\spatialite-loadable-modules-5.0.0-win-amd64
     - name: Verify installation
       run: |
         python -c "import sqlite3; sqlite3.enable_load_extension(True); sqlite3.load_extension('mod_spatialite')"
