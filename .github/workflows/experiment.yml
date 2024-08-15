@@ -23,12 +23,13 @@ jobs:
         # python -m pip install pysqlite3-binary
         # pip install datasette
     - name: Download mod_spatialite
-      run: Invoke-WebRequest -outfile spatialite.7z https://static.simonwillison.net/static/2024/spatialite-loadable-modules-5.0.0-win-amd64.7z
+      run: Invoke-WebRequest -outfile spatialite.7z http://www.gaia-gis.it/gaia-sins/windows-bin-x86/mod_spatialite-5.1.0-win-x86.7z
     - name: Unpack the archive
       run: 7z.exe x spatialite.7z
     - name: Show all files
       run: |
-        $folderPath = "$PWD\spatialite-loadable-modules-5.0.0-win-amd64"
+        # $folderPath = "$PWD\spatialite-loadable-modules-5.0.0-win-amd64"
+        $folderPath = "$PWD"
         Get-ChildItem -Path $folderPath -Recurse | ForEach-Object { $_.FullName }
     - name: Show path
       run: echo $PWD\spatialite-loadable-modules-5.0.0-win-amd64
