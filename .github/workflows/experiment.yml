@@ -1,29 +1,51 @@
-name: sqlite-vec on Windows
+name: Python Setup with Datasette and Spatialite
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
     branches: [ main ]
 
 jobs:
   setup:
     runs-on: windows-latest
+    
     steps:
+    - uses: actions/checkout@v4
+    
     - name: Set up Python 3.12
       uses: actions/setup-python@v5
       with:
         python-version: '3.12'
-    - name: Install sqlite-vec
+    
+    - name: Install Datasette
       run: |
-        pip install sqlite-vec
+        # python -m pip install pysqlite3-binary
+        pip install datasette
+    - name: Download mod_spatialite
+      run: Invoke-WebRequest -outfile spatialite.7z http://www.gaia-gis.it/gaia-sins/windows-bin-amd64/mod_spatialite-5.1.0-win-amd64.7z
+    - name: Unpack the archive
+      run: 7z.exe x spatialite.7z
+    - name: Show all files
+      run: |
+        Get-ChildItem -Path $PWD -Recurse | ForEach-Object { $_.FullName }
+    - name: Show path
+      run: echo $PWD\mod_spatialite-5.1.0-win-amd64
     - name: Verify installation
       run: |
+        cd $PWD\mod_spatialite-5.1.0-win-amd64
         python -c @"
         import sqlite3, os
-        import sqlite_vec
+        spatialite_path = 'mod_spatialite.dll'
+        print(f'Checking path: {spatialite_path}')
+        exists = os.path.exists(spatialite_path)
+        if exists:
+            print(f'SpatiaLite file exists at: {spatialite_path}')
+        else:
+            assert False, f'SpatiaLite module not found at: {spatialite_path}'
         db = sqlite3.Connection(':memory:')
         db.enable_load_extension(True)
-        db.load_extension(sqlite_vec.loadable_path())
-        print(db.execute('select vec_version()').fetchall())
+        print("enable_load_extension(True) worked - trying to load extension: " + spatialite_path)
+        db.load_extension(spatialite_path)
+        print(db.execute('select spatialite_version()').fetchall())
         "@
+        datasette --version
+        datasette --load-extension mod_spatialite.dll --get /-/versions.json | jq
