@@ -28,16 +28,14 @@ jobs:
       run: 7z.exe x spatialite.7z
     - name: Show all files
       run: |
-        # $folderPath = "$PWD\spatialite-loadable-modules-5.0.0-win-amd64"
-        $folderPath = "$PWD"
-        Get-ChildItem -Path $folderPath -Recurse | ForEach-Object { $_.FullName }
+        Get-ChildItem -Path $PWD -Recurse | ForEach-Object { $_.FullName }
     - name: Show path
-      run: echo $PWD\spatialite-loadable-modules-5.0.0-win-amd64
+      run: echo $PWD\mod_spatialite-5.1.0-win-x86
     - name: Verify installation
       run: |
         python -c @"
         import sqlite3, os
-        spatialite_path = os.path.join(os.environ['GITHUB_WORKSPACE'], 'spatialite-loadable-modules-5.0.0-win-amd64', 'mod_spatialite.dll')
+        spatialite_path = os.path.join(os.environ['GITHUB_WORKSPACE'], 'mod_spatialite-5.1.0-win-x86', 'mod_spatialite.dll')
         print(f'Checking path: {spatialite_path}')
         assert os.path.exists(spatialite_path), f'SpatiaLite module not found at: {spatialite_path}'
         db = sqlite3.Connection(':memory:')
