@@ -1,0 +1,18 @@
+name: uv example
+
+on:
+  workflow_dispatch:
+
+jobs:
+  uv-example:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up uv
+        run: |-
+          curl -LsSf https://astral.sh/uv/0.3.0/install.sh | sh
+          cd
+          pwd
+          find .
+          find .cargo
+          find .cache
