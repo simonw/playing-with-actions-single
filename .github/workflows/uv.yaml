@@ -17,8 +17,10 @@ jobs:
       if: steps.cache-primes.outputs.cache-hit != 'true'
       run: |
         curl -LsSf https://astral.sh/uv/0.3.0/install.sh | sh
+        cd $HOME
         find .cargo
     - name: Run uv
       run: |
         uv python install
+        cd $HOME
         find .
