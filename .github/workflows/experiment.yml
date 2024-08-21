@@ -1,8 +1,7 @@
 name: Python Setup with Datasette and Spatialite
 
 on:
-  push:
-    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   setup:
