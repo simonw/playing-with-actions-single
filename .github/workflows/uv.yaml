@@ -7,12 +7,18 @@ jobs:
   uv-example:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up uv
-        run: |-
-          curl -LsSf https://astral.sh/uv/0.3.0/install.sh | sh
-          cd
-          pwd
-          find .
-          find .cargo
-          find .cache
+    - uses: actions/checkout@v4
+    - id: cache-cargo-bin
+      uses: actions/cache@v4
+      with:
+        path: .cargo/bin
+        key: ${{ runner.os }}-cargo-bin
+    - name: Generate Prime Numbers
+      if: steps.cache-primes.outputs.cache-hit != 'true'
+      run: |
+        curl -LsSf https://astral.sh/uv/0.3.0/install.sh | sh
+        find .cargo
+    - name: Run uv
+      run: |
+        uv python install
+        find .
