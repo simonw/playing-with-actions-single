@@ -1,0 +1,101 @@
+name: Batch create issues
+
+on:
+  push:
+    paths:
+      - 'batch-issues.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  create-issues:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Set Up Node.js
+        uses: actions/setup-node@v4
+      - name: Install Dependencies
+        run: |
+          npm install js-yaml
+      - name: Create GitHub Issues from YAML
+        id: create_issues
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          const fs = require('fs');
+          const yaml = require('js-yaml');
+          const { Octokit } = require("@octokit/rest");
+
+          // Initialize Octokit with the GitHub token
+          const octokit = new Octokit({
+            auth: process.env.GITHUB_TOKEN,
+          });
+
+          // Read and parse the batch-issues.yml file
+          const fileContents = fs.readFileSync('batch-issues.yml', 'utf8');
+          const issues = yaml.load(fileContents);
+
+          if (!Array.isArray(issues)) {
+            throw new Error('batch-issues.yml should contain a list of issues');
+          }
+
+          // Array to store created issue numbers
+          const createdIssueNumbers = [];
+
+          // GitHub context
+          const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
+
+          // Function to create an issue
+          async function createIssue(issue) {
+            const { title, body, labels } = issue;
+
+            const response = await octokit.issues.create({
+              owner,
+              repo,
+              title,
+              body,
+              labels: labels || [],
+            });
+
+            return response.data.number;
+          }
+
+          (async () => {
+            for (const issue of issues) {
+              if (!issue.title || !issue.body) {
+                console.error('Each issue must have at least a title and body.');
+                continue;
+              }
+
+              try {
+                const issueNumber = await createIssue(issue);
+                console.log(`Created issue #${issueNumber}: ${issue.title}`);
+                createdIssueNumbers.push(issueNumber);
+              } catch (error) {
+                console.error(`Failed to create issue "${issue.title}": ${error.message}`);
+              }
+            }
+
+            if (createdIssueNumbers.length === 0) {
+              throw new Error('No issues were created.');
+            }
+
+            // Export the created issue numbers for later steps
+            console.log(`::set-output name=issue_numbers::${createdIssueNumbers.join(',')}`);
+          })();
+      
+      - name: Delete batch-issues.yml
+        run: |
+          git rm batch-issues.yml
+
+      - name: Commit Deletion with Issue References
+        run: |
+          ISSUE_NUMBERS="${{ steps.create_issues.outputs.issue_numbers }}"
+          COMMIT_MESSAGE="Batch created issues: ${ISSUE_NUMBERS}"
+          git config user.name "Automated"
+          git config user.email "actions@users.noreply.github.com"
+          git commit -m "${COMMIT_MESSAGE}"
+          git push
