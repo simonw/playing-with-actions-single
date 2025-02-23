@@ -10,7 +10,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
+
+      - name: Show IP before Tailscale
+        run: |
+          echo "IP from ifconfig.me:"
+          curl -s https://ifconfig.me
+
       - name: Setup Tailscale
         uses: tailscale/github-action@v3
         with:
