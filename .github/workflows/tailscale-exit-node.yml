@@ -21,9 +21,10 @@ jobs:
         with:
           oauth-client-id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
           oauth-secret: ${{ secrets.TAILSCALE_OAUTH_SECRET }}
-          args: "--exit-node=${{ secrets.TAILSCALE_EXIT_NODE }}"
           tags: tag:github-actions
-      
+      - name: Use named exit node
+        run: |
+          timeout 5m sudo -E tailscale set --exit-node=apple-tv
       - name: Verify HTTP traffic is routed through exit node
         run: |
           echo "Available exit nodes:"
