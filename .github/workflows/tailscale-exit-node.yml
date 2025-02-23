@@ -21,7 +21,7 @@ jobs:
         with:
           oauth-client-id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
           oauth-secret: ${{ secrets.TAILSCALE_OAUTH_SECRET }}
-          # Optionally specify tags for this machine
+          args: "--exit-node=${{ secrets.TAILSCALE_EXIT_NODE }} --exit-node-allow-lan-access=true"
           tags: tag:github-actions
       
       - name: Configure Tailscale to use exit node
@@ -32,17 +32,6 @@ jobs:
           # List available exit nodes
           echo "Available exit nodes:"
           tailscale status | grep 'exit node'
-          
-          # Connect to the exit node (replace EXIT_NODE_NAME with your actual exit node hostname)
-          EXIT_NODE_NAME="${{ secrets.TAILSCALE_EXIT_NODE }}"
-          tailscale up --exit-node="$EXIT_NODE_NAME" --exit-node-allow-lan-access --reset --operator="$USER"
-          
-          # Wait for the exit node routing to take effect
-          sleep 5
-          
-          # Verify connection through exit node
-          echo "Current Tailscale status:"
-          tailscale status
           
           # Verify public IP has changed to the exit node's IP
           echo "Current public IP address:"
