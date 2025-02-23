@@ -1,12 +1,7 @@
 name: Tailscale Exit Node Workflow
 
 on:
-  workflow_dispatch:  # Manual trigger
-  # Add other triggers as needed
-  # push:
-  #   branches: [ main ]
-  # pull_request:
-  #   branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   run-with-tailscale:
@@ -24,21 +19,11 @@ jobs:
           args: "--exit-node=${{ secrets.TAILSCALE_EXIT_NODE }} --exit-node-allow-lan-access=true"
           tags: tag:github-actions
       
-      - name: Configure Tailscale to use exit node
-        run: |
-          # Wait for Tailscale to be fully connected
-          sleep 5
-          
-          # List available exit nodes
-          echo "Available exit nodes:"
-          tailscale status | grep 'exit node'
-          
-          # Verify public IP has changed to the exit node's IP
-          echo "Current public IP address:"
-          curl -s https://ifconfig.me
-      
       - name: Verify HTTP traffic is routed through exit node
         run: |
+          echo "Available exit nodes:"
+          tailscale status | grep 'exit node'
+
           # This step confirms that HTTP requests are using the exit node's IP
           echo "Testing HTTP routing..."
           
@@ -51,30 +36,3 @@ jobs:
           
           echo "IP from api.ipify.org:"
           curl -s https://api.ipify.org
-          
-          # Optional: Compare with expected exit node IP range
-          # EXPECTED_IP_PREFIX="203.0.113"  # Example prefix
-          # CURRENT_IP=$(curl -s https://ifconfig.me)
-          # if [[ $CURRENT_IP == $EXPECTED_IP_PREFIX* ]]; then
-          #   echo "Success: Traffic is routed through the expected exit node"
-          # else
-          #   echo "Error: Traffic is not routing through the expected exit node"
-          #   exit 1
-          # fi
-      
-      # Your actual workflow steps go here
-      - name: Run your workflow commands
-        run: |
-          echo "Now running commands with HTTP traffic routed through Tailscale exit node"
-          # Example: Clone a private repository
-          # git clone https://github.com/your-org/private-repo.git
-          
-          # Example: Make API calls
-          # curl -s https://api.your-internal-service.com/endpoint
-          
-      # Optional: Disconnect from Tailscale at the end
-      - name: Disconnect from Tailscale
-        if: always()  # Run even if previous steps fail
-        run: |
-          tailscale down
-          echo "Disconnected from Tailscale"
