@@ -35,7 +35,7 @@ jobs:
           
           # Connect to the exit node (replace EXIT_NODE_NAME with your actual exit node hostname)
           EXIT_NODE_NAME="${{ secrets.TAILSCALE_EXIT_NODE }}"
-          tailscale up --exit-node="$EXIT_NODE_NAME" --exit-node-allow-lan-access --reset
+          tailscale up --exit-node="$EXIT_NODE_NAME" --exit-node-allow-lan-access --reset --operator="$USER"
           
           # Wait for the exit node routing to take effect
           sleep 5
