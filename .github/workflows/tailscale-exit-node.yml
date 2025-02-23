@@ -1,4 +1,4 @@
-name: Tailscale Exit Node Workflow
+name: Tailscale exit node demo
 
 on:
   workflow_dispatch:
@@ -29,15 +29,5 @@ jobs:
           echo "Available exit nodes:"
           tailscale status | grep 'exit node'
 
-          # This step confirms that HTTP requests are using the exit node's IP
-          echo "Testing HTTP routing..."
-          
-          # Get current IP from multiple sources to verify
           echo "IP from ifconfig.me:"
           curl -s https://ifconfig.me
-          
-          echo "IP from ipinfo.io:"
-          curl -s https://ipinfo.io/ip
-          
-          echo "IP from api.ipify.org:"
-          curl -s https://api.ipify.org
