@@ -1,0 +1,400 @@
+name: The Multi-Language GitHub Actions Carnival 🎭
+
+on:
+  workflow_dispatch:
+    inputs:
+      message:
+        description: 'Message to pass to various shells'
+        required: true
+        default: 'Hello from GitHub Actions!'
+
+jobs:
+  shell-extravaganza:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cowsay figlet lolcat toilet jq fortune bc \
+                                 ruby python3 tcc r-base php lua5.3 nodejs \
+                                 perl gawk make 
+          
+          # Install Rust without prompts
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+          
+          # Install Go
+          wget https://golang.org/dl/go1.21.0.linux-amd64.tar.gz
+          sudo tar -C /usr/local -xzf go1.21.0.linux-amd64.tar.gz
+          echo "/usr/local/go/bin" >> $GITHUB_PATH
+      
+      # Python as a shell
+      - name: Python Shell Magic 🐍
+        shell: python3 {0}
+        run: |
+          import sys
+          import random
+          from datetime import datetime
+          
+          message = "${{ github.event.inputs.message }}"
+          colors = ["\033[31m", "\033[32m", "\033[33m", "\033[34m", "\033[35m", "\033[36m"]
+          reset = "\033[0m"
+          
+          for char in message:
+              color = random.choice(colors)
+              sys.stdout.write(f"{color}{char}{reset}")
+              
+          print(f"\n\nPython thinks the time is: {datetime.now()}")
+          print(f"This is running on Python {sys.version}")
+
+      # Ruby as a shell
+      - name: Ruby Shell Elegance 💎
+        shell: ruby {0}
+        run: |
+          require 'date'
+          
+          message = "${{ github.event.inputs.message }}"
+          puts message.chars.map { |c| c.ord.to_s(16) }.join(' ')
+          puts "\nDecoded hexadecimal is: #{message}"
+          puts "Ruby time: #{DateTime.now}"
+      
+      # Node.js as a shell
+      - name: Node.js Shell 🟢
+        shell: node {0}
+        run: |
+          const message = "${{ github.event.inputs.message }}";
+          
+          // Create ASCII art
+          const asciiArt = message.split('').map(char => {
+            return char.charCodeAt(0).toString(2).padStart(8, '0');
+          }).join('\n');
+          
+          console.log("Your message in binary:");
+          console.log(asciiArt);
+          console.log("\nNode.js version:", process.version);
+          console.log("Current memory usage:", process.memoryUsage().heapUsed / 1024 / 1024, "MB");
+
+      # AWK as a shell (this is a bit cursed!)
+      - name: AWK Shell Wizardry 🧙
+        shell: gawk -f {0}
+        run: |
+          BEGIN {
+            message = "${{ github.event.inputs.message }}";
+            print "AWK received: " message;
+            
+            print "\nLet me count the characters for you:";
+            for (i = 1; i <= length(message); i++) {
+              char = substr(message, i, 1);
+              counts[char]++;
+            }
+            
+            print "\nCharacter frequency:";
+            for (char in counts) {
+              printf("%s: %s\n", char, repeats(counts[char], "*"));
+            }
+            
+            exit 0;
+          }
+          
+          function repeats(n, s,    result) {
+            result = "";
+            for (i = 0; i < n; i++) {
+              result = result s;
+            }
+            return result;
+          }
+
+      # Perl as a shell
+      - name: Perl Shell Oneliner 🐪
+        shell: perl {0}
+        run: |
+          use strict;
+          use warnings;
+          
+          my $message = "${{ github.event.inputs.message }}";
+          
+          print "Perl received: $message\n\n";
+          print "Let me reverse that for you: " . scalar(reverse($message)) . "\n";
+          print "And here it is ROT13'd: " . $message =~ tr/A-Za-z/N-ZA-Mn-za-m/r . "\n";
+          
+          my @words = split(/\s+/, $message);
+          print "\nWord count: " . scalar(@words) . "\n";
+          
+          print "Current Perl version: $^V\n";
+
+      # Makefile as a shell (extremely cursed!)
+      - name: Makefile Shell 🏗️
+        run: |
+          echo '.PHONY: all
+
+          MESSAGE = ${{ github.event.inputs.message }}
+          
+          all:
+          	@echo "Makefile received: $(MESSAGE)"
+          	@echo
+          	@echo "Makefile is running targets for each word:"
+          	@for word in $(MESSAGE); do \
+          		$(MAKE) -f $(MAKEFILE_LIST) word WORD=$$word; \
+          	done
+          
+          word:
+          	@echo "  Processing word: $(WORD) ($(shell echo $(WORD) | wc -c) chars)"
+          ' > ./makefile_shell.mk
+          
+          # Now actually run it
+          echo "./makefile_shell.mk" >> $GITHUB_PATH
+
+      - name: Run the Makefile shell
+        shell: make -f {0}
+        run: |
+          all:
+            @echo "This is being interpreted by Make!"
+            @echo "Running target: $@"
+            @echo
+            @figlet "${{ github.event.inputs.message }}"
+      
+      # Rust as a shell (very cursed!)
+      - name: Rust Shell 🦀
+        shell: rustc -o /tmp/rust_shell {0} && /tmp/rust_shell
+        run: |
+          fn main() {
+              let message = "${{ github.event.inputs.message }}";
+              println!("Rust received: {}", message);
+              
+              // Print a box around the message
+              let border = "=".repeat(message.len() + 4);
+              println!("\n{}", border);
+              println!("| {} |", message);
+              println!("{}\n", border);
+              
+              println!("This was compiled and executed by rustc!");
+          }
+      
+      # Go as a shell
+      - name: Go Shell 🧩
+        shell: go run {0}
+        run: |
+          package main
+          
+          import (
+            "fmt"
+            "strings"
+            "time"
+          )
+          
+          func main() {
+            message := "${{ github.event.inputs.message }}"
+            fmt.Println("Go received:", message)
+            
+            // Create a progress bar
+            fmt.Println("\nProcessing message:")
+            for i := 0; i <= 10; i++ {
+              bar := strings.Repeat("█", i) + strings.Repeat("░", 10-i)
+              fmt.Printf("\r[%s] %d%%", bar, i*10)
+              time.Sleep(100 * time.Millisecond)
+            }
+            fmt.Println("\nDone!")
+            
+            fmt.Println("\nGo version executed at:", time.Now().Format(time.RFC3339))
+          }
+
+      # PHP as a shell (why not?)
+      - name: PHP Shell 🐘
+        shell: php {0}
+        run: |
+          <?php
+          $message = "${{ github.event.inputs.message }}";
+          echo "PHP received: " . $message . "\n\n";
+          
+          // Create a simple HTML page
+          echo "Generating HTML...\n\n";
+          $html = <<<HTML
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>PHP Generated in GitHub Actions</title>
+              <style>
+                  body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+                  .message { color: #3498db; font-size: 24px; border: 1px solid #ccc; padding: 20px; }
+              </style>
+          </head>
+          <body>
+              <h1>Message from GitHub Actions</h1>
+              <div class="message">{$message}</div>
+              <p>Generated at: " . date('Y-m-d H:i:s') . "</p>
+          </body>
+          </html>
+          HTML;
+          
+          // Write to a file
+          file_put_contents("message.html", $html);
+          echo "HTML file generated!\n";
+          echo "PHP version: " . phpversion() . "\n";
+          
+      # R as a shell (extremely cursed!)
+      - name: R Statistical Shell 📊
+        shell: Rscript {0}
+        run: |
+          # Get the message
+          message <- "${{ github.event.inputs.message }}"
+          cat("R received:", message, "\n\n")
+          
+          # Generate some random data and analyze it
+          cat("Here's a quick analysis of random data:\n")
+          
+          # Generate random data
+          set.seed(42)
+          data <- rnorm(100, mean=10, sd=2)
+          
+          # Summary statistics
+          cat("Summary statistics:\n")
+          print(summary(data))
+          
+          # Correlation with another random dataset
+          data2 <- data + rnorm(100, mean=0, sd=1)
+          cat("\nCorrelation coefficient:", cor(data, data2), "\n")
+          
+          cat("\nAnalysis completed at:", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n")
+
+      # Cowsay as a shell (just for fun)
+      - name: Cowsay Shell 🐄
+        shell: cowsay {0}
+        run: |
+          ${{ github.event.inputs.message }}
+          
+      # Fortune | Cowsay | Lolcat (piping shells!)
+      - name: Piped Shell Madness 🌈
+        shell: fortune | cowsay | lolcat
+        run: |
+          # This run content is ignored since the shell command
+          # doesn't use {0}, but it's required to be here
+          echo "This is ignored"
+
+      # Figlet as a shell (for ASCII art)
+      - name: Figlet ASCII Shell 🎨
+        shell: figlet -k {0}
+        run: |
+          ${{ github.event.inputs.message }}
+
+      # jq as a shell (for JSON processing)
+      - name: jq JSON Shell 📝
+        shell: jq -n {0}
+        run: |
+          {
+            "message": "${{ github.event.inputs.message }}",
+            "timestamp": now | strftime("%Y-%m-%d %H:%M:%S"),
+            "github": {
+              "actor": "${{ github.actor }}",
+              "repository": "${{ github.repository }}",
+              "workflow": "${{ github.workflow }}"
+            },
+            "system_info": {
+              "runner_os": "${{ runner.os }}",
+              "runner_arch": "${{ runner.arch }}"
+            }
+          }
+
+      # Lua as a shell
+      - name: Lua Shell 🌙
+        shell: lua {0}
+        run: |
+          local message = "${{ github.event.inputs.message }}"
+          print("Lua received: " .. message .. "\n")
+          
+          -- Create a simple animation
+          print("Loading...")
+          for i = 1, 10 do
+            io.write(string.rep(".", i))
+            io.flush()
+            os.execute("sleep 0.2")
+          end
+          print("\nDone!")
+          
+          -- Print message backwards with a twist
+          print("\nBackwards with twist:")
+          local rev = string.reverse(message)
+          for i = 1, #rev do
+            local char = rev:sub(i, i)
+            if i % 2 == 0 then
+              io.write(string.upper(char))
+            else
+              io.write(string.lower(char))
+            end
+          end
+          print("\n")
+          
+          print("Lua version: " .. _VERSION)
+
+      # bc (calculator) as a shell
+      - name: Calculator Shell 🧮
+        shell: bc -l {0}
+        run: |
+          /* This is a bc calculator program */
+          print "BC Calculator received: ${{ github.event.inputs.message }}\n"
+          print "Let me solve some math for you:\n"
+          
+          /* Calculate pi approximately */
+          print "Approximation of pi: "
+          4 * a(1)
+          
+          /* Calculate factorial of 5 */
+          print "\n5! = "
+          define f(n) {
+            if (n <= 1) return 1
+            return n * f(n-1)
+          }
+          f(5)
+          
+          print "\n2^10 = "
+          2^10
+          
+          print "\nSquare root of 1234: "
+          sqrt(1234)
+
+      # sed as a shell (extremely cursed!)
+      - name: Sed Shell 📝
+        shell: sed -E {0}
+        run: |
+          s/^(.*)$/${{ github.event.inputs.message }}/g
+          s/a/🅰️/g
+          s/e/🅴/g
+          s/i/🅸/g
+          s/o/🅾️/g
+          s/u/🆄/g
+
+      # Create a final report
+      - name: Final Shell Report 📊
+        run: |
+          echo "# 🎭 Multi-Language GitHub Actions Carnival Report 🎪" > report.md
+          echo "" >> report.md
+          echo "## Input Message" >> report.md
+          echo "\`\`\`" >> report.md
+          echo "${{ github.event.inputs.message }}" >> report.md
+          echo "\`\`\`" >> report.md
+          echo "" >> report.md
+          echo "## Shells Used" >> report.md
+          echo "- Python 🐍" >> report.md
+          echo "- Ruby 💎" >> report.md
+          echo "- Node.js 🟢" >> report.md
+          echo "- AWK 🧙" >> report.md
+          echo "- Perl 🐪" >> report.md
+          echo "- Makefile 🏗️" >> report.md
+          echo "- Rust 🦀" >> report.md
+          echo "- Go 🧩" >> report.md
+          echo "- PHP 🐘" >> report.md
+          echo "- R 📊" >> report.md
+          echo "- Cowsay 🐄" >> report.md
+          echo "- Figlet 🎨" >> report.md
+          echo "- jq 📝" >> report.md
+          echo "- Lua 🌙" >> report.md
+          echo "- bc 🧮" >> report.md
+          echo "- sed 📝" >> report.md
+          echo "" >> report.md
+          echo "## Timestamp" >> report.md
+          echo "Run at: $(date)" >> report.md
+          
+          echo "Report generated at report.md"
+          cat report.md
