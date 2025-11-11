@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  create-issues:
+  cowsay:
     runs-on: ubuntu-latest
     steps:
     - uses: astral-sh/setup-uv@v7
       with:
         enable-cache: true
     - name: Cowsay
-      run: uvx cowsay "I hope this is cached"
+      run: uvx cowsay -t "I hope this is cached"
