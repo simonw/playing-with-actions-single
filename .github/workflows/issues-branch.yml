@@ -74,9 +74,9 @@ jobs:
         working-directory: data-branch
         run: |
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            fetch-github-issues simonw/todos --all
+            fetch-github-issues ${{ github.repository }} --all
           else
-            fetch-github-issues simonw/todos ${{ github.event.issue.number || github.event.comment.issue_number }}
+            fetch-github-issues ${{ github.repository }} ${{ github.event.issue.number || github.event.comment.issue_number }}
           fi
 
       # 7) Commit and push changes (includes requirements.txt on first run)
